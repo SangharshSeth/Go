@@ -6,9 +6,10 @@ import (
 
 type User struct {
 	gorm.Model
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username    string `json:"username"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	UserProfile UserProfile
 }
 type Likes []string
 
@@ -19,4 +20,5 @@ type UserProfile struct {
 	Height float64 `json:"height"`
 	Weight int     `json:"weight"`
 	Likes  Likes   `gorm:"serializer:json" json:"likes"`
+	UserId uint
 }
