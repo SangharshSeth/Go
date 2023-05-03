@@ -4,7 +4,9 @@ import (
 	"CLI-Tools/auth"
 	"encoding/json"
 	"fmt"
+	"github.com/joho/godotenv"
 	"net/http"
+	"os"
 )
 
 type AuthenticationHandler struct{}
@@ -15,20 +17,21 @@ type UserDetails struct {
 }
 
 func Signup(writer http.ResponseWriter, request *http.Request) {
-
+	godotenv.Load()
 	decoder := json.NewDecoder(request.Body)
 	decoder.DisallowUnknownFields()
-
 	var data UserDetails
 	err := decoder.Decode(&data)
-
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
 	}
-
-	Jwt, err := auth.GenerateJWT([]byte("Sangharsh"), data.Password)
-	_ = err
-
+	env := os.Getenv("JWTSECRET")
+	fmt.Println(env)
+	Jwt, err := auth.GenerateJWT([]byte(env), data.Password)
+	if err != nil {
+		fmt.Println("Failed to generate JWT")
+	}
 	fmt.Fprint(writer, "SUCCESS", Jwt)
 }
 
