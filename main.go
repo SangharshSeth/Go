@@ -25,7 +25,7 @@ func main() {
 	mux.Handle("/upload", &FileUploadHandler)
 	mux.HandleFunc("/video/", LogHandler.ServeHTTP)
 
-	err := http.ListenAndServe(":80", mux)
+	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		panic(err)
 	}
