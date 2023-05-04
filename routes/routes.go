@@ -20,7 +20,7 @@ func getInfo(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		fmt.Println("Failed to restrict File Size")
 	}
-	file, fileHeader, err := request.FormFile("myfile")
+	file, fileHeader, err := request.FormFile("Document")
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 	}
