@@ -20,6 +20,7 @@ type UserDetails struct {
 func Signup(writer http.ResponseWriter, request *http.Request) {
 	err := godotenv.Load()
 	if err != nil {
+		log.Print("Failed to Parse the env guys")
 		return
 	}
 	decoder := json.NewDecoder(request.Body)
