@@ -49,6 +49,7 @@ func DiscordOAuth2(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (auth *AuthenticationHandler) ServeHTTP(write http.ResponseWriter, request *http.Request) {
+	log.Print(request.URL.Path)
 	switch request.URL.Path {
 	case "/auth/signup":
 		Signup(write, request)
