@@ -1,7 +1,7 @@
 package database
 
 import (
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -10,7 +10,7 @@ var (
 )
 
 func ConnectDatabase() {
-	conn, err := gorm.Open(mysql.Open("root:sangharsh@tcp(127.0.0.1)/development?utf8mb4&parseTime=True&loc=Local&tls=false"),
+	conn, err := gorm.Open(postgres.Open("postgresql://sangharsh:JsywqQBG_W8fQw7P-ZEFAg@development-2927.7s5.cockroachlabs.cloud:26257/development?sslmode=verify-full"),
 		&gorm.Config{})
 
 	if err != nil {
