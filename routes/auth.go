@@ -49,14 +49,24 @@ func DiscordOAuth2(writer http.ResponseWriter, request *http.Request) {
 	http.Redirect(writer, request, url, 301)
 }
 
+func HandleDiscordOAuth2Callback(writer http.ResponseWriter, request *http.Request) {
+	var code = request.URL.Query().Get("code")
+	_, err := fmt.Fprint(writer, code)
+	if err != nil {
+		log.Panic("Error is", err.Error())
+		return
+	}
+}
+
 func (auth *AuthenticationHandler) ServeHTTP(write http.ResponseWriter, request *http.Request) {
 	log.Print(request.URL.Path)
 	switch request.URL.Path {
 	case "/auth/signup":
 		Signup(write, request)
 	case "/auth/discord":
-		log.Println("Came to discord oauth2")
 		DiscordOAuth2(write, request)
+	case "/auth/discord_callback":
+		HandleDiscordOAuth2Callback(write, request)
 	}
 
 }
