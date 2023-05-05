@@ -2,11 +2,13 @@ package routes
 
 import (
 	"CLI-Tools/auth"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -15,6 +17,14 @@ type AuthenticationHandler struct{}
 type UserDetails struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type OAuthResponse struct {
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
+	Scope        string `json:"scope"`
 }
 
 func Signup(writer http.ResponseWriter, request *http.Request) {
@@ -44,9 +54,9 @@ func Signup(writer http.ResponseWriter, request *http.Request) {
 }
 
 func DiscordOAuth2(writer http.ResponseWriter, request *http.Request) {
-	var url = os.Getenv("DISCORD_GENERATED_URL")
-	log.Printf("Generated URL is %s", url)
-	http.Redirect(writer, request, url, 301)
+	var DiscordForwardURL = os.Getenv("DISCORD_GENERATED_URL")
+	log.Printf("Generated URL is %s", DiscordForwardURL)
+	http.Redirect(writer, request, DiscordForwardURL, 301)
 }
 
 func HandleDiscordOAuth2Callback(writer http.ResponseWriter, request *http.Request) {
@@ -56,6 +66,32 @@ func HandleDiscordOAuth2Callback(writer http.ResponseWriter, request *http.Reque
 		log.Panic("Error is", err.Error())
 		return
 	}
+
+	httpClient := &http.Client{}
+
+	var body = url.Values{}
+	body.Set("client_id", os.Getenv("DISCORD_CLIENT_ID"))
+	body.Set("client_secret", os.Getenv("DISCORD_CLIENT_SECRET"))
+	body.Set("grant_type", "authorization_code")
+	body.Set("code", code)
+	body.Set("redirect_uri", os.Getenv("DISCORD_REDIRECT_URL"))
+
+	err = godotenv.Load()
+
+	httpRequest, err := http.NewRequest("POST", "https://discord.com/api/oauth2/token", bytes.NewBufferString(body.Encode()))
+	httpRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	httpRequest.Header.Set("Accept-Encoding", "application/x-www-form-urlencoded")
+
+	resp, err := httpClient.Do(httpRequest)
+
+	decoded := json.NewDecoder(resp.Body)
+
+	var OAuthData OAuthResponse
+	decodeErr := decoded.Decode(&OAuthData)
+	if decodeErr != nil {
+		log.Print("Failed to decode OAuth2 data", decodeErr.Error())
+	}
+	_, err = fmt.Fprint(writer, OAuthData)
 }
 
 func (auth *AuthenticationHandler) ServeHTTP(write http.ResponseWriter, request *http.Request) {
