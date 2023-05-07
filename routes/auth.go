@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
@@ -64,7 +65,6 @@ func HandleDiscordOAuth2Callback(writer http.ResponseWriter, request *http.Reque
 	_, err := fmt.Fprint(writer, code)
 	if err != nil {
 		log.Panic("Error is", err.Error())
-		return
 	}
 
 	httpClient := &http.Client{}
@@ -91,6 +91,13 @@ func HandleDiscordOAuth2Callback(writer http.ResponseWriter, request *http.Reque
 	if decodeErr != nil {
 		log.Print("Failed to decode OAuth2 data", decodeErr.Error())
 	}
+
+	var store = sessions.NewCookieStore([]byte(os.Getenv("SESSIONKEY")))
+
+	session, _ := store.Get(request, "session-name")
+	session.Values["authToken"] = OAuthData.AccessToken
+	err = session.Save(request, writer)
+	http.Redirect(writer, request, "http://localhost:3000/user", http.StatusSeeOther)
 	_, err = fmt.Fprint(writer, OAuthData)
 }
 

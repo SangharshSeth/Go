@@ -3,11 +3,13 @@ module CLI-Tools
 go 1.20
 
 require (
+	github.com/gorilla/sessions v1.2.1
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/gorm v1.25.0
 )
 
 require (
+	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.3.1 // indirect
