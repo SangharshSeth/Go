@@ -97,7 +97,7 @@ func HandleDiscordOAuth2Callback(writer http.ResponseWriter, request *http.Reque
 	session, _ := store.Get(request, "session-name")
 	session.Values["authToken"] = OAuthData.AccessToken
 	err = session.Save(request, writer)
-	http.Redirect(writer, request, "http://localhost:3000/signup", http.StatusSeeOther)
+	http.Redirect(writer, request, "google.com", http.StatusSeeOther)
 }
 
 func (auth *AuthenticationHandler) ServeHTTP(write http.ResponseWriter, request *http.Request) {
