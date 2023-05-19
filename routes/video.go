@@ -14,7 +14,11 @@ func StreamMedia(writer http.ResponseWriter, request *http.Request) {
 
 func LogRequest(writer http.ResponseWriter, request *http.Request) {
 	log.Print(request.URL.Path)
-	fmt.Fprint(writer, request.URL.RawPath)
+	_, err := fmt.Fprint(writer, request.URL.RawPath)
+	fmt.Print("Came to Logger API")
+	if err != nil {
+		return
+	}
 }
 
 func (h *MediaHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
