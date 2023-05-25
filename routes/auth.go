@@ -86,6 +86,11 @@ func HandleDiscordOAuth2Callback(writer http.ResponseWriter, request *http.Reque
 
 	decoded := json.NewDecoder(resp.Body)
 
+	//user data
+	// check database
+	// generate access token
+	fmt.Println("ACCESS TOKEN", resp)
+
 	var OAuthData OAuthResponse
 	decodeErr := decoded.Decode(&OAuthData)
 	if decodeErr != nil {
