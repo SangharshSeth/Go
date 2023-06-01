@@ -37,18 +37,18 @@ func Signup(writer http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
 	decoder.DisallowUnknownFields()
 	var data UserDetails
-	err = decoder.Decode(&data)
-	if err != nil {
+	bodyParseError := decoder.Decode(&data)
+	if bodyParseError != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 	env := os.Getenv("JWTSECRET")
-	fmt.Println(env)
-	Jwt, err := auth.GenerateJWT([]byte(env), data.Password)
-	if err != nil {
+
+	Jwt, JWTGenerateError := auth.GenerateJWT([]byte(env), data.Password)
+	if JWTGenerateError != nil {
 		fmt.Println("Failed to generate JWT")
 	}
-	_, err = fmt.Fprint(writer, "SUCCESS", Jwt)
+	_, err = fmt.Fprint(writer, Jwt)
 	if err != nil {
 		return
 	}

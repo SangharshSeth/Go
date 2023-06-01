@@ -1,8 +1,11 @@
 package database
 
 import (
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+	"os"
 )
 
 var (
@@ -10,7 +13,12 @@ var (
 )
 
 func ConnectDatabase() {
-	conn, err := gorm.Open(postgres.Open("postgresql://sangharsh:JsywqQBG_W8fQw7P-ZEFAg@development-2927.7s5.cockroachlabs.cloud:26257/development?sslmode=verify-full"),
+	envErr := godotenv.Load()
+	if envErr != nil {
+		log.Fatal("Failed to Load Environment Variables")
+	}
+	DatabaseConnectionString := os.Getenv("DSN")
+	conn, err := gorm.Open(postgres.Open(DatabaseConnectionString),
 		&gorm.Config{})
 
 	if err != nil {
