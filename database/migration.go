@@ -1,12 +1,12 @@
 package database
 
-import "CLI-Tools/models"
+//import "github.com/sangharshseth/models"
 
-func Migrate() {
-	ConnectDatabase()
-	db := GetDatabase()
-	err := db.AutoMigrate(&models.User{}, &models.UserProfile{})
-	if err != nil {
-		panic(err)
-	}
-}
+//func Migrate() {
+//ConnectDatabase()
+//db := GetDatabase()
+//err := db.AutoMigrate(&models.User{}, &models.UserProfile{})
+//if err != nil {
+//	panic(err)
+//}
+//}

@@ -1,33 +1,50 @@
 package database
 
 import (
-	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"context"
 	"log"
 	"os"
+
+	//"path/filepath"
+
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	db *gorm.DB
-)
+var dbCtx context.Context
+var dbConn *mongo.Client
 
 func ConnectDatabase() {
+	log.Print("In connect")
 	envErr := godotenv.Load()
 	if envErr != nil {
 		log.Fatal("Failed to Load Environment Variables")
 	}
-	DatabaseConnectionString := os.Getenv("DSN")
-	conn, err := gorm.Open(postgres.Open(DatabaseConnectionString),
-		&gorm.Config{})
-
+	//certPath := "/Users/sangharsh/Documents/GitHub/GO/utils/sangharsh_cert.pem/humbalele"
+	ctx := context.TODO()
+	log.Print("After ctx")
+	uri := os.Getenv("MONGODB_ADDRESS")
+	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
+	clientOptions := options.Client().
+		ApplyURI(uri).
+		SetServerAPIOptions(serverAPIOptions)
+	log.Print("Entered before connect")
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		panic(err)
+		log.Print("Failed to connect")
+		log.Print(err.Error())
+	}
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		log.Printf("Failed to connec to database due to error %s", err.Error())
+		os.Exit(1)
 	}
 
-	db = conn
+	dbCtx = ctx
+	dbConn = client
 }
 
-func GetDatabase() *gorm.DB {
-	return db
+func GetDatabase() (context.Context, *mongo.Client) {
+	return dbCtx, dbConn
 }

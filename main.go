@@ -1,20 +1,19 @@
 package main
 
 import (
-	"CLI-Tools/database"
-	"CLI-Tools/routes"
 	"fmt"
+	"github.com/sangharshseth/routes"
+	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 
-	database.ConnectDatabase()
-	conn := database.GetDatabase()
+	//conn := database.GetDatabase()
 
-	_ = conn
-	// database.Migrate()
-	database.Migrate()
+	//database.Migrate()
+	//database.Migrate()
 
 	mux := http.NewServeMux()
 
@@ -28,7 +27,6 @@ func main() {
 			return
 		}
 		_ = fprint
-		return
 	})
 	mux.Handle("/auth/", &AuthHandler)
 	mux.Handle("/upload", &FileUploadHandler)
@@ -36,6 +34,7 @@ func main() {
 
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
-		panic(err)
+		log.Printf("Error %s", err.Error())
+		os.Exit(0)
 	}
 }

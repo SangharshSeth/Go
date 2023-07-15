@@ -8,10 +8,6 @@ import (
 
 type MediaHandler struct{}
 
-func StreamMedia(writer http.ResponseWriter, request *http.Request) {
-
-}
-
 func LogRequest(writer http.ResponseWriter, request *http.Request) {
 	log.Print(request.URL.Path)
 	_, err := fmt.Fprint(writer, request.URL.RawPath)
