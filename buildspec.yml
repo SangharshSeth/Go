@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      golang: 1.20 # Specify the Go version you're using
+      golang: 1.16 # Specify the Go version you're using
 
   pre_build:
     commands:
