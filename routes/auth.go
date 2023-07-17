@@ -1,31 +1,37 @@
 package routes
 
 import (
+	"context"
 	"encoding/json"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/sangharshseth/database"
 	"github.com/sangharshseth/models"
 )
 
-type AuthenticationHandler struct{}
+type AuthenticationHandler struct {
+	Ctx context.Context
+	Db  *mongo.Client
+}
 
 type UserDetails struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func Signup(writer http.ResponseWriter, request *http.Request) {
+func Signup(writer http.ResponseWriter, request *http.Request, ctx context.Context, db *mongo.Client) {
 	err := godotenv.Load()
 	if err != nil {
 		log.Print("Failed to Parse the env guys")
 		return
 	}
-	database.ConnectDatabase()
-	ctx, db := database.GetDatabase()
+	if ctx == nil || db == nil {
+		log.Printf("Error during getting database contet and database db %s", ctx)
+	}
 	decoder := json.NewDecoder(request.Body)
 	decoder.DisallowUnknownFields()
 	var data UserDetails
@@ -40,7 +46,7 @@ func Signup(writer http.ResponseWriter, request *http.Request) {
 		Password: data.Password,
 	}
 	coll := db.Database("development").Collection("Users")
-	_, err = coll.InsertOne(ctx, user)
+	result, err := coll.InsertOne(ctx, user)
 	if err != nil {
 		log.Printf("Failed to insert %s", err.Error())
 		_, err2 := writer.Write([]byte("Failed to insert"))
@@ -49,15 +55,17 @@ func Signup(writer http.ResponseWriter, request *http.Request) {
 		}
 		os.Exit(0)
 	}
-
+	userId := result.InsertedID.(primitive.ObjectID)
+	log.Printf("UserId of Inserted User is %s", userId.String())
 	respBody := make(map[string]string)
 	respBody["data"] = "User Successfully Created"
 	writer.Header().Set("Content-Type", "application/json")
-	writer.Header().Set("Token", "Sangharsh")
+	writer.Header().Set("Token", userId.String())
 	err = json.NewEncoder(writer).Encode(&respBody)
 
 	if err != nil {
 		// Handle the error
+		log.Printf(err.Error())
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -66,8 +74,8 @@ func Signup(writer http.ResponseWriter, request *http.Request) {
 func (auth *AuthenticationHandler) ServeHTTP(write http.ResponseWriter, request *http.Request) {
 	log.Print(request.URL.Path)
 	switch request.URL.Path {
-	case "/auth/signup":
-		Signup(write, request)
+	case "/lib/signup":
+		Signup(write, request, auth.Ctx, auth.Db)
 	}
 
 }

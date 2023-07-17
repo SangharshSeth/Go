@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	//"path/filepath"
 
@@ -21,14 +22,14 @@ func ConnectDatabase() {
 	if envErr != nil {
 		log.Fatal("Failed to Load Environment Variables")
 	}
-	//certPath := "/Users/sangharsh/Documents/GitHub/GO/utils/sangharsh_cert.pem/humbalele"
+	//certPath := "/Users/sangharsh/Documents/GitHub/GO/utils/sangharsh_cert.pem/"
 	ctx := context.TODO()
 	log.Print("After ctx")
 	uri := os.Getenv("MONGODB_ADDRESS")
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().
 		ApplyURI(uri).
-		SetServerAPIOptions(serverAPIOptions)
+		SetServerAPIOptions(serverAPIOptions).SetMaxPoolSize(10).SetConnectTimeout(10 * time.Second)
 	log.Print("Entered before connect")
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
