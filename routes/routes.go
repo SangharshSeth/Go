@@ -63,7 +63,7 @@ func getInfo(writer http.ResponseWriter, request *http.Request) {
 	fileBytes, _ := os.ReadFile(newFilePath)
 
 	fmt.Println(fileBytes)
-	writer.WriteHeader(202)
+	writer.WriteHeader(http.StatusAccepted)
 	writer.Header().Set("Content-Type", "application/json")
 
 	fileDetails := make(map[string]string)

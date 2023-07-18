@@ -92,15 +92,26 @@ func Login(writer http.ResponseWriter, request *http.Request, ctx context.Contex
 	var Result bson.M
 	err = UserCollection.FindOne(ctx, bson.M{"email": data.Email}).Decode(&Result)
 	if err != nil {
-		if err == mongo.ErrNilDocument {
+		if err == mongo.ErrNoDocuments {
 			log.Print("User Does not exists")
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			http.Error(writer, "User Does not Exist", http.StatusBadRequest)
 			return
 		} else {
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
+
+	hashedPw := Result["password"].(string)
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPw), []byte(data.Password))
+	if err != nil {
+		lib.HTTPResponse("Authorization Error: Password Error", writer, http.StatusBadRequest)
+		return
+	}
+
+	lib.HTTPResponse("Successfully Logged In, man", writer, http.StatusOK)
+	return
 
 }
 

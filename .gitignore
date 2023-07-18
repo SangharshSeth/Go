@@ -1,8 +1,8 @@
 .env
-/bin
 .cache
-.idea/
+.idea
 .DS_Store
 main
-main2
 uploads
+bin
+auth.signup.http

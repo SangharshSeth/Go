@@ -6,8 +6,6 @@ import (
 	"os"
 	"time"
 
-	//"path/filepath"
-
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -22,28 +20,34 @@ func ConnectDatabase() {
 	if envErr != nil {
 		log.Fatal("Failed to Load Environment Variables")
 	}
-	//certPath := "/Users/sangharsh/Documents/GitHub/GO/utils/sangharsh_cert.pem/"
 	ctx := context.TODO()
-	log.Print("After ctx")
+
 	uri := os.Getenv("MONGODB_ADDRESS")
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().
 		ApplyURI(uri).
 		SetServerAPIOptions(serverAPIOptions).SetMaxPoolSize(10).SetConnectTimeout(10 * time.Second)
-	log.Print("Entered before connect")
+
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Print("Failed to connect")
 		log.Print(err.Error())
+		return
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Printf("Failed to connec to database due to error %s", err.Error())
-		os.Exit(1)
+		return
 	}
 
 	dbCtx = ctx
 	dbConn = client
+}
+
+func CloseDatabase() {
+	err := dbConn.Disconnect(dbCtx)
+	if err != nil {
+		return
+	}
 }
 
 func GetDatabase() (context.Context, *mongo.Client) {

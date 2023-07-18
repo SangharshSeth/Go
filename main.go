@@ -5,13 +5,15 @@ import (
 	"github.com/sangharshseth/routes"
 	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
 
 	database.ConnectDatabase()
+	defer database.CloseDatabase()
+
 	ctx, db := database.GetDatabase()
+
 	mux := http.NewServeMux()
 
 	FileUploadHandler := routes.HttpHandler{}
@@ -27,6 +29,6 @@ func main() {
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		log.Printf("Error %s", err.Error())
-		os.Exit(0)
+		return
 	}
 }
