@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/sangharshseth/database"
-	"github.com/sangharshseth/routes"
+	"github.com/sangharshseth/internal/database"
+	"github.com/sangharshseth/internal/routes"
 	"log"
 	"net/http"
 )

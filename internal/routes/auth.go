@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/joho/godotenv"
-	"github.com/sangharshseth/lib"
-	"github.com/sangharshseth/models"
+	"github.com/sangharshseth/internal/models"
+	"github.com/sangharshseth/pkg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -62,12 +62,12 @@ func Signup(writer http.ResponseWriter, request *http.Request, ctx context.Conte
 	result, err := coll.InsertOne(ctx, user)
 	if err != nil {
 		log.Printf("Failed to insert %s", err.Error())
-		lib.HTTPResponse("Failed to Create User", writer, http.StatusInternalServerError)
+		pkg.HTTPResponse("Failed to Create User", writer, http.StatusInternalServerError)
 	}
 	userId := result.InsertedID.(primitive.ObjectID)
 	log.Printf("UserId of Inserted User is %s", userId.String())
 	writer.Header().Set("Token", userId.String())
-	lib.HTTPResponse("User Created Successfully", writer, http.StatusCreated)
+	pkg.HTTPResponse("User Created Successfully", writer, http.StatusCreated)
 }
 
 func Login(writer http.ResponseWriter, request *http.Request, ctx context.Context, db *mongo.Client) {
@@ -106,11 +106,11 @@ func Login(writer http.ResponseWriter, request *http.Request, ctx context.Contex
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPw), []byte(data.Password))
 	if err != nil {
-		lib.HTTPResponse("Authorization Error: Password Error", writer, http.StatusBadRequest)
+		pkg.HTTPResponse("Authorization Error: Password Error", writer, http.StatusBadRequest)
 		return
 	}
 
-	lib.HTTPResponse("Successfully Logged In, man", writer, http.StatusOK)
+	pkg.HTTPResponse("Successfully Logged In, man", writer, http.StatusOK)
 	return
 
 }
