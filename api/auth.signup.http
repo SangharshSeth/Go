@@ -1,0 +1,19 @@
+POST http://localhost:8080/auth/signup
+Content-Type: application/json
+
+{
+  "email": "testu@mail.com",
+  "password": "pass",
+  "platform": ["xbox", "pc", "mobile"]
+}
+### Here comes login
+
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@mail.com",
+  "password": "paass"
+}
+
+
