@@ -1,4 +1,4 @@
-package database
+package connections
 
 import (
 	"context"
@@ -15,7 +15,6 @@ var dbCtx context.Context
 var dbConn *mongo.Client
 
 func ConnectDatabase() {
-	log.Print("In connect")
 	envErr := godotenv.Load()
 	if envErr != nil {
 		log.Fatal("Failed to Load Environment Variables")
@@ -35,7 +34,7 @@ func ConnectDatabase() {
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Printf("Failed to connec to database due to error %s", err.Error())
+		log.Printf("Failed to connec to connections due to error %s", err.Error())
 		return
 	}
 

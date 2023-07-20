@@ -42,6 +42,7 @@ func getInfo(writer http.ResponseWriter, request *http.Request) {
 			}
 		}
 	}
+
 	randomName := rand.Int()
 	fmt.Println(randomName)
 	dst, _ := os.Create(fmt.Sprintf("./uploads/%d%s", randomName, filepath.Ext(fileHeader.Filename)))

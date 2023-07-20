@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/sangharshseth/internal/database"
+	"github.com/rs/cors"
+	"github.com/sangharshseth/internal/connections"
 	"github.com/sangharshseth/internal/routes"
 	"log"
 	"net/http"
@@ -9,12 +10,14 @@ import (
 
 func main() {
 
-	database.ConnectDatabase()
-	defer database.CloseDatabase()
+	connections.ConnectDatabase()
+	defer connections.CloseDatabase()
 
-	ctx, db := database.GetDatabase()
+	ctx, db := connections.GetDatabase()
 
 	mux := http.NewServeMux()
+
+	corsHandler := cors.Default().Handler(mux)
 
 	FileUploadHandler := routes.HttpHandler{}
 	AuthHandler := routes.AuthenticationHandler{
@@ -26,7 +29,7 @@ func main() {
 	mux.Handle("/auth/", &AuthHandler)
 	mux.Handle("/upload", &FileUploadHandler)
 
-	err := http.ListenAndServe(":8080", mux)
+	err := http.ListenAndServe(":8080", corsHandler)
 	if err != nil {
 		log.Printf("Error %s", err.Error())
 		return

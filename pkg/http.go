@@ -10,7 +10,9 @@ func SuccessStatusCode(statusCode int) bool {
 	return statusCode >= 200 && statusCode < 300
 }
 
-func HTTPResponse(data interface{}, writer http.ResponseWriter, statusCode int) {
+func HTTPResponse(data interface{}, writer http.ResponseWriter, statusCode int, headers map[string]string) {
+	log.Print(headers)
+	log.Print("In Headers")
 	respBody := make(map[string]interface{})
 	if SuccessStatusCode(statusCode) {
 		respBody["status"] = "Success"
@@ -18,11 +20,14 @@ func HTTPResponse(data interface{}, writer http.ResponseWriter, statusCode int) 
 		respBody["status"] = "Failed"
 	}
 	respBody["result"] = data
+	for key, value := range headers {
+		writer.Header().Set(key, value)
+	}
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(statusCode)
 	err := json.NewEncoder(writer).Encode(&respBody)
 	if err != nil {
-		log.Printf(err.Error())
+		log.Print(err.Error())
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
 }

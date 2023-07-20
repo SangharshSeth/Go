@@ -3,6 +3,10 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/joho/godotenv"
 	"github.com/sangharshseth/internal/models"
 	"github.com/sangharshseth/pkg"
@@ -10,9 +14,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"net/http"
-	"time"
 )
 
 type AuthenticationHandler struct {
@@ -38,7 +39,7 @@ func Signup(writer http.ResponseWriter, request *http.Request, ctx context.Conte
 		return
 	}
 	if ctx == nil || db == nil {
-		log.Printf("Error during getting database contet and database db %s", ctx)
+		log.Printf("Error during getting connections contet and connections db %s", ctx)
 	}
 	decoder := json.NewDecoder(request.Body)
 	decoder.DisallowUnknownFields()
@@ -60,14 +61,15 @@ func Signup(writer http.ResponseWriter, request *http.Request, ctx context.Conte
 	}
 	coll := db.Database("development").Collection("Users")
 	result, err := coll.InsertOne(ctx, user)
+	headers := make(map[string]string)
 	if err != nil {
 		log.Printf("Failed to insert %s", err.Error())
-		pkg.HTTPResponse("Failed to Create User", writer, http.StatusInternalServerError)
+		pkg.HTTPResponse("Failed to Create User", writer, http.StatusInternalServerError, headers)
 	}
 	userId := result.InsertedID.(primitive.ObjectID)
 	log.Printf("UserId of Inserted User is %s", userId.String())
 	writer.Header().Set("Token", userId.String())
-	pkg.HTTPResponse("User Created Successfully", writer, http.StatusCreated)
+	pkg.HTTPResponse("User Created Successfully", writer, http.StatusCreated, headers)
 }
 
 func Login(writer http.ResponseWriter, request *http.Request, ctx context.Context, db *mongo.Client) {
@@ -77,7 +79,7 @@ func Login(writer http.ResponseWriter, request *http.Request, ctx context.Contex
 		return
 	}
 	if ctx == nil || db == nil {
-		log.Printf("Error during getting database contet and database db %s", ctx)
+		log.Printf("Error during getting connections contet and connections db %s", ctx)
 	}
 	decoder := json.NewDecoder(request.Body)
 	decoder.DisallowUnknownFields()
@@ -103,15 +105,16 @@ func Login(writer http.ResponseWriter, request *http.Request, ctx context.Contex
 	}
 
 	hashedPw := Result["password"].(string)
-
+	Headers := map[string]string{
+		"Authorization": "Bearer Please Work",
+	}
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPw), []byte(data.Password))
 	if err != nil {
-		pkg.HTTPResponse("Authorization Error: Password Error", writer, http.StatusBadRequest)
+		pkg.HTTPResponse("Authorization Error: Password Error", writer, http.StatusBadRequest, Headers)
 		return
 	}
-
-	pkg.HTTPResponse("Successfully Logged In, man", writer, http.StatusOK)
-	return
+	log.Print("Came before Response")
+	pkg.HTTPResponse("Successfully Logged In, man", writer, http.StatusOK, Headers)
 
 }
 
