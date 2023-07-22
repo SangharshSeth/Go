@@ -2,25 +2,22 @@ package connections
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var dbCtx context.Context
-var dbConn *mongo.Client
+type MongoService struct {
+	Ctx    context.Context
+	Client *mongo.Client
+}
 
-func ConnectDatabase() {
-	envErr := godotenv.Load()
-	if envErr != nil {
-		log.Fatal("Failed to Load Environment Variables")
-	}
+func ConnectDatabase() (*MongoService, error) {
 	ctx := context.TODO()
-
 	uri := os.Getenv("MONGODB_ADDRESS")
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().
@@ -29,26 +26,27 @@ func ConnectDatabase() {
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Print(err.Error())
-		return
+		return nil, fmt.Errorf("database Connection Error: %s", err.Error())
 	}
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Printf("Failed to connec to connections due to error %s", err.Error())
-		return
+		return nil, fmt.Errorf("database Connection Error: %s", err.Error())
 	}
 
-	dbCtx = ctx
-	dbConn = client
-}
-
-func CloseDatabase() {
-	err := dbConn.Disconnect(dbCtx)
-	if err != nil {
-		return
+	var MongoConnection = MongoService{
+		Ctx:    ctx,
+		Client: client,
 	}
+
+	return &MongoConnection, nil
 }
 
-func GetDatabase() (context.Context, *mongo.Client) {
-	return dbCtx, dbConn
+func (Mongo *MongoService) Close() {
+	if Mongo.Client != nil {
+		if err := Mongo.Client.Disconnect(Mongo.Ctx); err != nil {
+			log.Printf("Database Connection Close Error %s", err.Error())
+		} else {
+			log.Print("Database Connection Close Success %")
+		}
+	}
 }

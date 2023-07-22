@@ -3,11 +3,12 @@ package routes
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/sangharshseth/internal/models"
 	"github.com/sangharshseth/pkg"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,31 +22,26 @@ type AuthenticationHandler struct {
 	Db  *mongo.Client
 }
 
-type UserDetails struct {
+type UserRegistrationDetails struct {
 	Email    string   `json:"email"`
 	Password string   `json:"password"`
 	Platform []string `json:"platform"`
 }
 
-type LoginDetails struct {
+type UserLoginDetails struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 func Signup(writer http.ResponseWriter, request *http.Request, ctx context.Context, db *mongo.Client) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Print("Failed to Parse the env guys")
-		return
-	}
 	if ctx == nil || db == nil {
-		log.Printf("Error during getting connections contet and connections db %s", ctx)
+		log.Fatalf("Error during getting connections contet and connections db %s", ctx)
 	}
 	decoder := json.NewDecoder(request.Body)
 	decoder.DisallowUnknownFields()
-	var data UserDetails
-	bodyParseError := decoder.Decode(&data)
-	if bodyParseError != nil {
+	var data UserRegistrationDetails
+	err := decoder.Decode(&data)
+	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -63,29 +59,25 @@ func Signup(writer http.ResponseWriter, request *http.Request, ctx context.Conte
 	result, err := coll.InsertOne(ctx, user)
 	headers := make(map[string]string)
 	if err != nil {
-		log.Printf("Failed to insert %s", err.Error())
-		pkg.HTTPResponse("Failed to Create User", writer, http.StatusInternalServerError, headers)
+		log.Printf("Failed to insert user: %s", err)
+		http.Error(writer, "Failed to create user", http.StatusInternalServerError)
+		return
 	}
 	userId := result.InsertedID.(primitive.ObjectID)
-	log.Printf("UserId of Inserted User is %s", userId.String())
+
 	writer.Header().Set("Token", userId.String())
 	pkg.HTTPResponse("User Created Successfully", writer, http.StatusCreated, headers)
 }
 
 func Login(writer http.ResponseWriter, request *http.Request, ctx context.Context, db *mongo.Client) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Print("Failed to Parse the env guys")
-		return
-	}
 	if ctx == nil || db == nil {
-		log.Printf("Error during getting connections contet and connections db %s", ctx)
+		log.Fatalf("Error during getting connections contet and connections db %s", ctx)
 	}
 	decoder := json.NewDecoder(request.Body)
 	decoder.DisallowUnknownFields()
-	var data LoginDetails
-	bodyParseError := decoder.Decode(&data)
-	if bodyParseError != nil {
+	var data UserLoginDetails
+	err := decoder.Decode(&data)
+	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -105,16 +97,18 @@ func Login(writer http.ResponseWriter, request *http.Request, ctx context.Contex
 	}
 
 	hashedPw := Result["password"].(string)
-	Headers := map[string]string{
-		"Authorization": "Bearer Please Work",
-	}
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPw), []byte(data.Password))
 	if err != nil {
-		pkg.HTTPResponse("Authorization Error: Password Error", writer, http.StatusBadRequest, Headers)
+		log.Print("Incorrect Password")
+		http.Error(writer, "Authentication Error: Wrong Password", http.StatusBadRequest)
 		return
 	}
-	log.Print("Came before Response")
-	pkg.HTTPResponse("Successfully Logged In, man", writer, http.StatusOK, Headers)
+
+	SessionId := uuid.New().String()
+	Headers := map[string]string{
+		"Authorization": fmt.Sprintf("Bearer %s", SessionId),
+	}
+	pkg.HTTPResponse("Login Success", writer, http.StatusOK, Headers)
 
 }
 
