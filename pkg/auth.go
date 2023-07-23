@@ -13,7 +13,7 @@ func VerifyAccess(name string) bool {
 	}
 }
 
-func GenerateJWT(secret []byte, data string) (string, error) {
+func GenerateSignedJWT(secret []byte, data string) (string, error) {
 	JwtToken := jwt.NewWithClaims(
 		jwt.SigningMethodHS512,
 		jwt.MapClaims{

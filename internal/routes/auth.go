@@ -66,7 +66,7 @@ func Signup(writer http.ResponseWriter, request *http.Request, ctx context.Conte
 	userId := result.InsertedID.(primitive.ObjectID)
 
 	writer.Header().Set("Token", userId.String())
-	pkg.HTTPResponse("User Created Successfully", writer, http.StatusCreated, headers)
+	pkg.SendHttpResponse("User Created Successfully", writer, http.StatusCreated, headers)
 }
 
 func Login(writer http.ResponseWriter, request *http.Request, ctx context.Context, db *mongo.Client) {
@@ -108,7 +108,7 @@ func Login(writer http.ResponseWriter, request *http.Request, ctx context.Contex
 	Headers := map[string]string{
 		"Authorization": fmt.Sprintf("Bearer %s", SessionId),
 	}
-	pkg.HTTPResponse("Login Success", writer, http.StatusOK, Headers)
+	pkg.SendHttpResponse("Login Success", writer, http.StatusOK, Headers)
 
 }
 

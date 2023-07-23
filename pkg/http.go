@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func HTTPResponse(data interface{}, writer http.ResponseWriter, statusCode int, headers map[string]string) {
+func SendHttpResponse(data interface{}, writer http.ResponseWriter, statusCode int, headers map[string]string) {
 	log.Print(headers)
 	respBody := map[string]interface{}{
 		"result": data,
