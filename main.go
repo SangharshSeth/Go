@@ -9,6 +9,12 @@ import (
 	"net/http"
 )
 
+
+func healthCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
 func main() {
 	envErr := godotenv.Load()
 	if envErr != nil {
@@ -29,9 +35,13 @@ func main() {
 		Db:  MongoClient.Client,
 	}
 
+
+
 	//Routes
 	mux.Handle("/auth/", &AuthHandler)
 	mux.Handle("/upload", &FileUploadHandler)
+
+	mux.HandleFunc("/healthcheck", healthCheck)
 
 	err = http.ListenAndServe(":8080", corsHandler)
 	if err != nil {
