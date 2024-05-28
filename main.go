@@ -1,14 +1,14 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"github.com/sangharshseth/internal/connections"
 	"github.com/sangharshseth/internal/routes"
-	"log"
-	"net/http"
 )
-
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -35,13 +35,11 @@ func main() {
 		Db:  MongoClient.Client,
 	}
 
-
-
 	//Routes
-	mux.Handle("/auth/", &AuthHandler)
-	mux.Handle("/upload", &FileUploadHandler)
+	mux.Handle("POST /auth/", &AuthHandler)
+	mux.Handle("POST /upload", &FileUploadHandler)
 
-	mux.HandleFunc("/healthcheck", healthCheck)
+	mux.HandleFunc("GET /healthcheck", healthCheck)
 
 	err = http.ListenAndServe(":8080", corsHandler)
 	if err != nil {
